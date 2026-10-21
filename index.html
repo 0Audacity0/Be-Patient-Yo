@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WARNING</title>
+<style>
+  :root { --red: #ff1a1a; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #000; overflow: hidden; }
+  body {
+    font-family: "Courier New", monospace;
+    color: #ddd;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse at center, #120008 0%, #000 70%),
+      #000;
+    animation: flicker 4s infinite;
+  }
+
+  /* Main content */
+  .screen { text-align: center; padding: 0 6vw; position: relative; z-index: 2; }
+  h1 {
+    font-size: clamp(2rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--red);
+    text-shadow: 3px 0 rgba(0,255,255,.55), -3px 0 rgba(255,0,60,.8), 0 0 18px rgba(255,26,26,.7), 0 0 50px rgba(255,26,26,.4);
+  }
+  p {
+    margin-top: 2.2rem;
+    font-size: clamp(1rem, 2.6vw, 1.9rem);
+    letter-spacing: .12em;
+    color: #cfcfcf;
+    text-shadow: 2px 0 rgba(0,255,255,.35), -2px 0 rgba(255,0,60,.35);
+  }
+  p::after { content: "_"; animation: blink 1s steps(1) infinite; }
+
+  /* VHS overlays */
+  .layer { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+  .scan {
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,.05) 0, rgba(255,255,255,.05) 1px, rgba(0,0,0,.35) 2px, rgba(0,0,0,.35) 3px);
+    mix-blend-mode: overlay;
+  }
+  .vignette { background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.85) 100%); }
+  .noise { opacity: .22; mix-blend-mode: screen; animation: noiseShift .4s steps(4) infinite; }
+  .noise svg { width: 120%; height: 120%; }
+  .tracking {
+    height: 14vh; top: -20vh; bottom: auto;
+    background: linear-gradient(to bottom, transparent, rgba(255,255,255,.12) 40%, rgba(255,255,255,.22) 50%, rgba(255,255,255,.1) 60%, transparent);
+    filter: blur(1px);
+    animation: roll 7s linear infinite;
+  }
+  .tracking::after {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px;
+    background: rgba(255,255,255,.35);
+    animation: tear .6s steps(3) infinite;
+  }
+
+  /* Countdown (bottom left) */
+  .countdown {
+    position: fixed; z-index: 6; bottom: 4vh; left: 4vw;
+    font-size: clamp(.9rem, 2.2vw, 1.6rem);
+    color: #fff; text-shadow: 2px 0 rgba(255,0,60,.8), -2px 0 rgba(0,255,255,.6);
+    letter-spacing: .15em; pointer-events: none;
+  }
+  .countdown small { display: block; font-size: .6em; opacity: .75; margin-bottom: .3em; }
+
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes flicker { 0%,100%{filter:brightness(1)} 8%{filter:brightness(1.25)} 9%{filter:brightness(.8)} 10%{filter:brightness(1)} 52%{filter:brightness(1.15)} 53%{filter:brightness(.85)} 54%{filter:brightness(1)} }
+  @keyframes roll { from { transform: translateY(0); } to { transform: translateY(140vh); } }
+  @keyframes tear { 0%{transform:translateX(-30px)} 33%{transform:translateX(40px)} 66%{transform:translateX(-10px)} 100%{transform:translateX(25px)} }
+  @keyframes noiseShift { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)} 75%{transform:translate(-2%,-1%)} 100%{transform:translate(3%,3%)} }
+</style>
+</head>
+<body>
+  <main class="screen">
+    <h1>Stop trying to find ways around a date</h1>
+    <p>Be patient for what you want to try/do</p>
+  </main>
+
+  <div class="layer noise">
+    <svg xmlns="http://www.w3.org/2000/svg">
+      <filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+      <rect width="100%" height="100%" filter="url(#n)"/>
+    </svg>
+  </div>
+  <div class="layer scan"></div>
+  <div class="layer tracking"></div>
+  <div class="layer vignette"></div>
+
+  <div class="countdown">
+    <small>DD : HH : MM : SS</small>
+    <span id="cd">--:--:--:--</span>
+  </div>
+
+<script>
+  // ============================================================
+  //  CHANGE THIS DATE to whatever you want to count down to.
+  //  Format: "YYYY-MM-DDTHH:MM:SS" (24-hour time, your local time)
+  // ============================================================
+  const TARGET_DATE = "2026-12-25T00:00:00";
+
+  const cd = document.getElementById("cd");
+  const pad = n => String(n).padStart(2, "0");
+  const target = new Date(TARGET_DATE).getTime();
+
+  function tick() {
+    let diff = Math.max(0, Math.floor((target - Date.now()) / 1000));
+    const d = Math.floor(diff / 86400);
+    const h = Math.floor(diff / 3600) % 24;
+    const m = Math.floor(diff / 60) % 60;
+    const s = diff % 60;
+    cd.textContent = pad(d) + ":" + pad(h) + ":" + pad(m) + ":" + pad(s);
+  }
+  tick();
+  setInterval(tick, 250);
+</script>
+</body>
+</html>
